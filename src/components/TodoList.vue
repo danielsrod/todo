@@ -2,18 +2,14 @@
 import { ref } from 'vue';
 import { Icon } from '@iconify/vue';
 
-interface ITodoObj {
-    id: string;
-    status: boolean;
-    text: string
-}
+import { ITodoObj, IEditTodoObj } from '../interfaces/index.ts'
 
 defineProps<{
     props: ITodoObj
 }>()
 
 const isEditing = ref(false);
-const currentTodoText = ref('');
+const currentTodoText = ref();
 
 const emits = defineEmits([
     'toggle-status',
@@ -29,27 +25,53 @@ const deleteTodo = (todoId: string) => {
     emits('delete-todo', todoId)
 }
 
-// :contentEditable="false"
+const confirmEditTodo = (todoId: string) => {
+    const objEditTodo: IEditTodoObj = {
+        todoId: todoId,
+        todoText: currentTodoText.value.innerText
+    }
+    emits('edit-todo', objEditTodo)
+    isEditing.value = false;
+}
+
+const cancelEditTodo = () => {
+    isEditing.value = false;
+}
 
 </script>
 
 <template>
     <div class="list__todo">
-        <p class="todo__text" :v-bind="currentTodoText" :class="props.status ? 'todo__text_done' : ''">{{ props.text }}</p>
+        <p v-if="!isEditing" class="todo__text" :v-bind="currentTodoText" :class="props.status ? 'todo__text_done' : ''">{{
+            props.text }}</p>
+        <p v-else ref="currentTodoText" :contentEditable="true" @keyup.enter="confirmEditTodo(props.id)">{{ props.text }}
+        </p>
         <div class="todo__actions">
-            <div class="wrap__icons">
+            <div v-if="!isEditing" class="wrap__icons">
                 <div class="wrap__icon">
                     <span @click="toggleStatus(props.id)" :class="props.status ? 'todo__done' : 'todo__pending'">
                     </span>
                 </div>
                 <div class="wrap__icon">
-                    <span>
+                    <span @click="isEditing = !isEditing">
                         <Icon class="edit" icon="carbon:edit" />
                     </span>
                 </div>
                 <div class="wrap__icon">
                     <span @click="deleteTodo(props.id)">
                         <Icon class="trash" icon="ph:trash" />
+                    </span>
+                </div>
+            </div>
+            <div v-else class="wrap__icons__editing">
+                <div class="wrap__icon">
+                    <span @click="confirmEditTodo(props.id)">
+                        <Icon class="edit" icon="line-md:confirm" />
+                    </span>
+                </div>
+                <div class="wrap__icon">
+                    <span @click="cancelEditTodo">
+                        <Icon class="trash" icon="fluent-mdl2:cancel" />
                     </span>
                 </div>
             </div>
@@ -69,13 +91,9 @@ const deleteTodo = (todoId: string) => {
     padding: 10px;
     font-family: Poppins, sans-serif;
     font-weight: 400;
-    margin-bottom: 20px;
-    margin-top: 20px;
-    width: 75%;
-    border-radius: 10px;
+    margin: 4px 4px 20px 4px;
+    border-radius: 7px;
     background: #e0e0e0;
-    box-shadow: 11px 11px 21px #cacaca,
-        -11px -11px 21px #f6f6f6;
 
     div {
         display: flex;
@@ -92,7 +110,7 @@ const deleteTodo = (todoId: string) => {
 .todo__pending {
     width: 25px;
     height: 25px;
-    background-color: rgb(128, 0, 0);
+    background-color: rgb(200, 0, 0);
     border-radius: 100%;
 }
 
@@ -140,5 +158,11 @@ span:active {
     display: flex;
     justify-content: space-between;
     width: 120px;
+}
+
+.wrap__icons__editing {
+    display: flex;
+    justify-content: space-between;
+    width: 80px;
 }
 </style>

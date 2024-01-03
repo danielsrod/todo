@@ -4,11 +4,7 @@ import { ref, onMounted } from 'vue';
 import TodoCreator from '../components/TodoCreator.vue'
 import TodoList from '../components/TodoList.vue'
 
-interface ITodoObj {
-    id: string;
-    status: boolean;
-    text: string;
-}
+import { IEditTodoObj, ITodoObj } from '../interfaces/index.ts'
 
 const todos = ref<ITodoObj[]>([]);
 
@@ -37,15 +33,25 @@ const deleteTodo = (todoId: string): void => {
     todos.value.splice(todoIndex, 1)
     localStorage.setItem('todoList', JSON.stringify(todos.value));
 }
+
+const editTodo = (objEditTodo: IEditTodoObj): void => {
+    const todoIndex = todos.value.findIndex(todo => {
+        return todo.id === objEditTodo.todoId
+    })
+    todos.value[todoIndex].text = objEditTodo.todoText;
+    localStorage.setItem('todoList', JSON.stringify(todos.value));
+}
 </script>
 
 <template>
     <main>
-        <h1>Create Todo</h1>
+        <h1>Todo Creator</h1>
         <TodoCreator class="todo__creator" @create-todo="createTodo" />
-        <TodoList @toggle-status="toggleStatus" @delete-todo="deleteTodo" v-if="todos.length > 0" class="todo__list"
-            v-for="todo in todos" :props="todo" />
-        <span class="todos__list__empty" v-else>You don't have any todo. Create one</span>
+        <div v-if="todos.length > 0" class="todo__list">
+            <TodoList @edit-todo="editTodo" @toggle-status="toggleStatus" @delete-todo="deleteTodo" v-for="todo in todos"
+                :props="todo" />
+        </div>
+        <span v-else class="todos__list__empty">You don't have any todo. Create one</span>
     </main>
 </template>
 
@@ -64,8 +70,11 @@ main {
 }
 
 .todo__list {
-    display: flex;
-    justify-content: space-between;
+    margin-top: 20px;
+    overflow-y: scroll;
+    width: 75%;
+    height: calc(100vh - 270px);
+    border: 0.5px solid rgba(128, 128, 128, 0.603);
 }
 
 .todos__list__empty {

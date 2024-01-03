@@ -58,7 +58,7 @@ input::placeholder {
     cursor: pointer;
     color: white;
     border-left: 1px solid rgba(128, 128, 128, 0.603);
-    background-color: rgb(17, 108, 43);
+    background-color: green;
 }
 
 .todo__create:hover {
