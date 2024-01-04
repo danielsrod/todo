@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { uid } from 'uid';
 
 const emit = defineEmits([
@@ -9,6 +9,7 @@ const emit = defineEmits([
 const todo = ref('');
 const invalid = ref(false);
 const inputCreateTodo = ref();
+const inputTypeTodo = ref();
 
 const createTodo = () => {
     if (todo.value.length > 0) {
@@ -25,15 +26,19 @@ const createTodo = () => {
     }
     invalid.value = true;
 }
+
+onMounted(() => {
+    inputCreateTodo.value.focus()
+})
 </script>
 
 <template>
-    <div class="todo__group">
-        <input placeholder="Type your todo here" ref="inputCreateTodo" @keyup.enter="createTodo" class="todo__input"
-            type="text" v-model="todo" maxlength="200">
+    <div class="todo__group" :class="invalid ? 'teste' : ''">
+        <input :placeholder="invalid ? 'Todo should be not empty' : 'Type your todo here'" ref="inputCreateTodo"
+            @keyup.enter="createTodo" class="todo__input" type="text" v-model="todo" maxlength="200">
         <button class="todo__create" @click="createTodo">Create</button>
     </div>
-    <span v-show="invalid" class="invalid__todo">Todo should be not empty</span>
+    <!-- <span v-show="invalid" class="invalid__todo">Todo should be not empty</span> -->
 </template>
 
 
@@ -48,6 +53,12 @@ const createTodo = () => {
 
 input::placeholder {
     text-align: center;
+}
+
+.teste {
+    input::placeholder {
+        color: red;
+    }
 }
 
 .todo__create {
